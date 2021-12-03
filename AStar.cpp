@@ -1,8 +1,10 @@
 #include <map>
+#include <type_traits>
 #include <vector>
 #include <utility>
 #include <iostream>
 #include <algorithm>
+#include <unordered_set>
 using namespace std;
 
 int dx[] = {1, -1, 0, 0};
@@ -81,12 +83,12 @@ struct State
 };
 
 multimap <int, State> open;  // f->s，open表。
+unordered_set <int> clos;  // 记录搜过的状态，closed表。
 map <State, int> fact;  // s->f，逆open表。
-map <int, bool> clos;  // 记录搜过的状态，closed表。
 vector <State> path;  // 记录路径。
 int search(const Mat &origin, const Mat &target)
 {
-    if (! origin.reachable(target)) return -1;
+    // if (! origin.reachable(target)) return -1;
     int id = 0, H = target - origin;
     State start{origin.val, 0, H, id, id++};
     open.insert(make_pair(H, start));
@@ -97,11 +99,12 @@ int search(const Mat &origin, const Mat &target)
         open.erase(open.begin());
         fact.erase(fact.lower_bound(p));
         path.push_back(p);
-        clos[p.s] = true;
+        clos.emplace(p.s);
         Mat mat(p.s);
         if (mat == target) return p.g;
         pair <int, int> zero = mat.findZero();
         int x = zero.first, y = zero.second;
+        bool flag = false;
         for (int i=0; i<4; i++)
         {
             int nx = x+dx[i], ny = y+dy[i];
@@ -129,9 +132,11 @@ int search(const Mat &origin, const Mat &target)
                         open.insert(make_pair(n.getF(), n));
                         fact.insert(make_pair(n, n.getF()));
                     }
+                    flag = true;
                 }
             }
         }
+        if (! flag) return -1;
     }
     return -1;
 }
@@ -151,29 +156,33 @@ void restorePath(int p, int len, int step)
 }
 int main()
 {
-    int origin = 0, target = 0;
-    puts("请输入初始状态：");
-    for (int i=0; i<3; i++)
-        for (int j=0; j<3; j++)
-        {
-            int num;
-            cin >> num;
-            origin = origin*10 + num;
-        }
-    puts("请输入目标状态：");
-    for (int i=0; i<3; i++)
-        for (int j=0; j<3; j++)
-        {
-            int num;
-            cin >> num;
-            target = target*10 + num;
-        }
+    // int origin = 0, target = 0;
+    // puts("请输入初始状态：");
+    // for (int i=0; i<3; i++)
+    //     for (int j=0; j<3; j++)
+    //     {
+    //         int num;
+    //         cin >> num;
+    //         origin = origin*10 + num;
+    //     }
+    // puts("请输入目标状态：");
+    // for (int i=0; i<3; i++)
+    //     for (int j=0; j<3; j++)
+    //     {
+    //         int num;
+    //         cin >> num;
+    //         target = target*10 + num;
+    //     }
+    // int origin = 123456780, target = 123456870;
+    
+    int origin = 123456780, target = 103425786;
     int step = search(Mat(origin), Mat(target));
     if (step != -1)
     {
         restorePath((path.end()-1)->p, path.size()-1, step);
-        puts("已达到目标状态。\n");
+        puts("已达到目标状态。");
     }
-    else cout << "无解！" << endl;
+    else puts("\n无解！");
+    printf("搜过%d步可能的步数。\n\n", (int) clos.size()-1);
     return 0;
 }
