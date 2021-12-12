@@ -175,9 +175,15 @@ int main()
     //         cin >> num;
     //         target = target*10 + num;
     //     }
+<<<<<<< HEAD:EightDigit-AStar.cpp
     
     int origin = 123456780, target = 123456870;
     // int origin = 123456780, target = 103425786;
+=======
+    // int origin = 123456780, target = 123456870;
+    
+    int origin = 123456780, target = 103425786;
+>>>>>>> 9fc94dba799e67cdc18e9da304e069793932389f:AStar.cpp
     int step = search(Mat(origin), Mat(target));
     if (step != -1)
     {
